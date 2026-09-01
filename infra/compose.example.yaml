@@ -1,0 +1,40 @@
+name: gamechanger-mvp-local
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["isolated-dependencies"]
+    environment:
+      POSTGRES_DB: gamechanger_mvp
+      POSTGRES_USER: gamechanger_mvp
+      POSTGRES_PASSWORD: local-development-only
+    ports:
+      - "55432:5432"
+    volumes:
+      - gamechanger_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gamechanger_mvp -d gamechanger_mvp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [gamechanger_local]
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["isolated-dependencies"]
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "56379:6379"
+    volumes:
+      - gamechanger_redis_data:/data
+    networks: [gamechanger_local]
+
+networks:
+  gamechanger_local:
+    name: gamechanger_mvp_local
+
+volumes:
+  gamechanger_postgres_data:
+    name: gamechanger_mvp_postgres_data
+  gamechanger_redis_data:
+    name: gamechanger_mvp_redis_data

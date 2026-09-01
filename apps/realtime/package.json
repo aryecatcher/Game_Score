@@ -1,0 +1,22 @@
+{
+  "name": "@gamechanger/realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "dependencies": {
+    "@gamechanger/config": "workspace:*",
+    "@gamechanger/contracts": "workspace:*",
+    "@gamechanger/infrastructure": "workspace:*",
+    "ws": "^8.18.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.0"
+  }
+}

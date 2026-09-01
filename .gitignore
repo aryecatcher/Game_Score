@@ -1,0 +1,20 @@
+node_modules/
+.pnpm-store/
+dist/
+coverage/
+.env
+.env.*.local
+*.log
+.DS_Store
+.idea/
+.vscode/
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+
+# Python 虚拟环境与生成/临时文件
+.venv/
+output/
+tmp/
+__pycache__/

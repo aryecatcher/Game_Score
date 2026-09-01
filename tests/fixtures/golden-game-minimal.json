@@ -1,0 +1,52 @@
+{
+  "fixtureVersion": "draft-0.1-not-coach-approved",
+  "syntheticOnly": true,
+  "gameId": "20000000-0000-4000-8000-000000000001",
+  "events": [
+    {
+      "sequence": 1,
+      "clientEventId": "60000000-0000-4000-8000-000000000101",
+      "payload": { "type": "GAME_STARTED" }
+    },
+    {
+      "sequence": 2,
+      "clientEventId": "60000000-0000-4000-8000-000000000102",
+      "payload": {
+        "type": "PLATE_APPEARANCE_RECORDED",
+        "offense": "AWAY",
+        "batterAthleteId": "30000000-0000-4000-8000-000000000002",
+        "result": "STRIKEOUT",
+        "runs": 0,
+        "outs": 1,
+        "rbi": 0
+      }
+    },
+    {
+      "sequence": 3,
+      "clientEventId": "60000000-0000-4000-8000-000000000103",
+      "payload": {
+        "type": "PLATE_APPEARANCE_RECORDED",
+        "offense": "AWAY",
+        "batterAthleteId": "30000000-0000-4000-8000-000000000002",
+        "result": "HOME_RUN",
+        "runs": 1,
+        "outs": 0,
+        "rbi": 1
+      }
+    }
+  ],
+  "expectedSnapshot": {
+    "status": "LIVE",
+    "inning": 1,
+    "half": "TOP",
+    "outs": 1,
+    "homeRuns": 0,
+    "awayRuns": 1,
+    "revision": 3
+  },
+  "approval": {
+    "companyCoachApproved": false,
+    "approvedBy": null,
+    "approvedAt": null
+  }
+}
