@@ -231,4 +231,4 @@ React Native 版本按当前官方稳定线配置为 0.87，采用 New Architect
 - [03｜系统架构与端到端流程](https://app.notion.com/p/3c9231db9557816491b3e824e41c4a78)
 - [04｜数据、权限、合规与测试方案](https://app.notion.com/p/3c9231db9557819da65adbec51c48041)
 
-GameChanger 与 Amadeus 完全独立；本仓库没有 Amadeus 的代码、数据、配置或依赖。
+
