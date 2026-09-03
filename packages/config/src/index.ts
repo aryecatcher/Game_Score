@@ -56,6 +56,11 @@ const EnvironmentSchema = z.object({
 
 export type Environment = z.infer<typeof EnvironmentSchema>;
 
+const insecureInternalServiceTokens = new Set([
+  "local-only-change-me",
+  "replace-with-a-long-random-local-secret"
+]);
+
 export function loadEnvironment(source: NodeJS.ProcessEnv = process.env): Environment {
   const env = EnvironmentSchema.parse(source);
   const missing: string[] = [];
@@ -71,7 +76,7 @@ export function loadEnvironment(source: NodeJS.ProcessEnv = process.env): Enviro
   if (env.NODE_ENV === "production" && !env.PILOT_TEAM_ID) missing.push("PILOT_TEAM_ID");
   if (env.NODE_ENV === "production" && !env.PILOT_GAME_ID) missing.push("PILOT_GAME_ID");
   if (env.NODE_ENV === "production" && env.OFFICIAL_STAT_SET_VERSION.startsWith("draft")) missing.push("OFFICIAL_STAT_SET_VERSION");
-  if (env.NODE_ENV === "production" && env.INTERNAL_SERVICE_TOKEN === "local-only-change-me") {
+  if (env.NODE_ENV === "production" && insecureInternalServiceTokens.has(env.INTERNAL_SERVICE_TOKEN)) {
     missing.push("INTERNAL_SERVICE_TOKEN");
   }
   if (env.PUBLIC_SHARING_ENABLED) {

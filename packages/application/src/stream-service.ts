@@ -10,6 +10,8 @@ export class StreamService {
   async start(accountId: Id, gameId: Id): Promise<StreamSession> {
     const game = await this.store.getGame(gameId);
     if (!game) throw new DomainError("NOT_FOUND", "Game was not found.", 404);
+    if (game.status === "FINAL") throw new DomainError("GAME_FINAL", "Final games cannot start a new stream.", 409);
+    if (game.status === "CANCELLED") throw new DomainError("CONTENT_BLOCKED", "Cancelled games cannot start a stream.", 409);
     const decision = authorize({ accountId, action: "STREAM_START", game, grants: await this.store.listGrants(accountId) });
     if (!decision.allowed) throw new DomainError("STREAM_ROLE_MISSING", "Account cannot start a stream for this game.", 403);
     const existing = await this.store.findStreamByGame(gameId);

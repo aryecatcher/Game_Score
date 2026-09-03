@@ -104,7 +104,7 @@ export default function App(): React.JSX.Element {
 
   const sync = async (): Promise<void> => {
     try {
-      const nextRevision = await services.sync.sync(ids.game, revision, 1);
+      const nextRevision = await services.sync.sync(ids.game, revision);
       setRevision(nextRevision);
       setMessage(`已同步到服务端 revision ${nextRevision}`);
     } catch (error) {

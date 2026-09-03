@@ -11,7 +11,7 @@ import {
   type Id
 } from "@gamechanger/contracts";
 import { loadEnvironment, type Environment } from "@gamechanger/config";
-import { authorize, DomainError, projectScore } from "@gamechanger/domain";
+import { authorize, DomainError, projectScore, type Account } from "@gamechanger/domain";
 import {
   bearerToken,
   DevIdentityProvider,
@@ -67,7 +67,15 @@ export function createApiApp(options: ApiAppOptions = {}): { app: FastifyInstanc
   const playbackService = new PlaybackService(store, videoProvider);
   const app = Fastify({ logger: env.NODE_ENV !== "test" ? { level: env.LOG_LEVEL } : false, genReqId: () => crypto.randomUUID() });
 
-  const authenticate = async (request: FastifyRequest): Promise<Id> => identity.authenticate(requestToken(request));
+  const authenticateAccount = async (request: FastifyRequest): Promise<Account> => {
+    const accountId = await identity.authenticate(requestToken(request));
+    const account = await store.getAccount(accountId);
+    if (!account || account.status !== "ACTIVE") {
+      throw new DomainError("UNAUTHENTICATED", "Account is not active in this pilot.", 401);
+    }
+    return account;
+  };
+  const authenticate = async (request: FastifyRequest): Promise<Id> => (await authenticateAccount(request)).id;
   const pilotTeamId = (env.PILOT_TEAM_ID ?? FIXTURE_IDS.team) as Id;
   const pilotGameId = (env.PILOT_GAME_ID ?? FIXTURE_IDS.game) as Id;
   const verifyInternal = (request: FastifyRequest): void => {
@@ -95,10 +103,15 @@ export function createApiApp(options: ApiAppOptions = {}): { app: FastifyInstanc
   app.get("/health", async () => ({ status: "ok", mode: env.APP_MODE, databaseConnected: env.APP_MODE === "postgres", videoProvider: videoProvider.name }));
 
   app.get("/v1/bootstrap", async (request) => {
-    const accountId = await authenticate(request);
-    const account = await store.getAccount(accountId);
-    if (!account) throw new DomainError("UNAUTHENTICATED", "Account is not in this pilot.", 401);
-    const grants = await store.listGrants(accountId);
+    const account = await authenticateAccount(request);
+    const accountId = account.id;
+    const grants = (await store.listGrants(accountId)).filter((grant) => {
+      if (grant.status !== "ACTIVE") return false;
+      if (grant.expiresAt && Date.parse(grant.expiresAt) <= Date.now()) return false;
+      if (grant.scopeType === "PLATFORM") return grant.role === "PLATFORM_ADMIN";
+      if (grant.scopeType === "TEAM") return grant.scopeId === pilotTeamId;
+      return grant.scopeId === pilotGameId;
+    });
     if (grants.length === 0) throw new DomainError("ROLE_MISSING", "Account is not assigned to this pilot.", 403);
     const game = await store.getGame(pilotGameId);
     const team = await store.getTeam(pilotTeamId);

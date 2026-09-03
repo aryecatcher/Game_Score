@@ -46,9 +46,7 @@ export class LiveScoreFollower {
     this.observer.onStatus?.({ type: "CONNECTING" });
     await this.reloadCanonicalEvents();
     if (!this.active) return;
-    this.feed.connect(this.token, this.gameId, this.latestSequence, (message) => {
-      void this.handle(message);
-    });
+    this.connectFeed();
   }
 
   stop(): void {
@@ -81,10 +79,24 @@ export class LiveScoreFollower {
   private async recover(requestedSequence: number): Promise<void> {
     if (this.recovery) return this.recovery;
     this.observer.onStatus?.({ type: "RECOVERING", requestedSequence });
-    this.recovery = this.reloadCanonicalEvents().finally(() => {
+    this.recovery = this.reloadCanonicalEvents().then(() => {
+      if (this.active) this.connectFeed();
+    }).finally(() => {
       this.recovery = undefined;
     });
     return this.recovery;
+  }
+
+  private connectFeed(): void {
+    this.feed.connect(this.token, this.gameId, this.latestSequence, (message) => {
+      void this.handle(message).catch((error: unknown) => {
+        this.observer.onStatus?.({
+          type: "ERROR",
+          code: "INTERNAL_ERROR",
+          message: error instanceof Error ? error.message : "Realtime recovery failed."
+        });
+      });
+    });
   }
 
   private async reloadCanonicalEvents(): Promise<void> {

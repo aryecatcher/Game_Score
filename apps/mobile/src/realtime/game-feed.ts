@@ -13,8 +13,12 @@ export class GameFeed {
       socket.send(JSON.stringify({ type: "SUBSCRIBE_GAME", gameId, afterSequence }));
     };
     socket.onmessage = (event) => {
-      const parsed = RealtimeServerMessageSchema.safeParse(JSON.parse(String(event.data)));
-      if (parsed.success) onMessage(parsed.data);
+      try {
+        const parsed = RealtimeServerMessageSchema.safeParse(JSON.parse(String(event.data)));
+        if (parsed.success) onMessage(parsed.data);
+      } catch {
+        // A malformed or non-text frame is not allowed to crash the React Native app.
+      }
     };
   }
 

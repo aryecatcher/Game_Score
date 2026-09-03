@@ -82,6 +82,8 @@ describe("LiveScoreFollower", () => {
     await vi.waitFor(() => expect(revisions.at(-1)).toBe(2));
 
     expect(api.events).toHaveBeenCalledTimes(2);
+    expect(feed.connect).toHaveBeenCalledTimes(2);
+    expect(feed.connect).toHaveBeenLastCalledWith("dev-token", gameId, 2, expect.any(Function));
     expect(statuses).toContainEqual({ type: "RECOVERING", requestedSequence: 2 });
     expect(statuses.at(-1)).toEqual({ type: "LIVE", latestSequence: 2 });
   });
